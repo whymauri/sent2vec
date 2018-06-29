@@ -13,11 +13,14 @@ cdef extern from "fasttext.h" namespace "fasttext":
 
     cdef cppclass FastText:
         FastText() except + 
+        void startNNSent(const string&)
+        void fetchNNSent(int,const string&,const string&)
         void loadModel(const string&)
         void textVector(string, vector[float]&)
         void textVectors(vector[string]&, int, vector[float])#&)
         int getDimension()
-
+        void nnSent(int, string)
+        vector[string] nnsent_
 
 cdef extern from "asvoid.h": 
      void *asvoid(vector[float] *buf)
@@ -99,3 +102,25 @@ cdef class Sent2vecModel:
         self._thisptr.textVectors(csentences, cnum_threads, w.buf[0])
         final = w.asarray(len(sentences) * self.get_emb_size()) 
         return final.reshape(len(sentences), self.get_emb_size())
+
+    def start_nnsent(self,filename):
+        self.load_model("../../../Downloads/twitter_bigrams.bin")
+        cdef string cfilename = filename.encode('utf-8', 'ignore')
+        self._thisptr.startNNSent(cfilename)
+
+    def single_nn(self,k,filename,query):
+        if k<=0 or not isinstance(k,int):
+            k = 10
+        print("\nQuery: " + query + "\n")
+        cdef int ck = k
+        cdef string cfilename = filename.encode('utf-8', 'ignore')
+        cdef string cquery = query.encode('utf-8', 'ignore')
+        self._thisptr.fetchNNSent(ck,cfilename,cquery)
+        return self._thisptr.nnsent_;
+
+    def nn_sentence(self,k,filename):
+        if k <= 0 or not isinstance(k,int):
+            k = 10
+        cdef int ck = k
+        cdef string cfilename = filename
+        self._thisptr.nnSent(ck,cfilename)

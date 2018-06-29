@@ -586,9 +586,9 @@ void FastText::findNNSent(const Matrix& sentenceVectors, const Vector& queryVec,
   while (i < k && heap.size() > 0) {
     auto it = banSet.find(heap.top().second);
     if (!std::isnan(heap.top().first)) {
-      std::cout << heap.top().first << " " 
-                                    << heap.top().second << " " 
-                                    << std::endl;
+      std::string nnsent= std::to_string(heap.top().first) + " " + heap.top().second;
+      nnsent_.push_back(nnsent);
+      std::cout << heap.top().first << " " << heap.top().second << " " << std::endl;
       i++;
     }
     heap.pop();
@@ -680,6 +680,63 @@ void FastText::nnSent(int32_t k, std::string filename) {
     std::cout << std::endl;
     std::cerr << "Query sentence? " << std::endl;
   }
+}
+
+void FastText::startNNSent(std::string filename) {  
+  std::string sentence;
+  std::ifstream in1(filename);
+  int64_t n = 0;
+
+  Vector buffer(args_->dim), query(args_->dim);
+  std::vector<std::string> sentences;
+
+  std::vector<int32_t> line, labels;
+  std::ifstream in2(filename);
+
+  while (in2.peek() != EOF) {
+    std::getline(in2, sentence);
+    n++;
+  }
+  std::cout << "Number of sentences in the corpus file is " << n << "." << std::endl ;
+  sent_ = Matrix(n+1, args_->dim);
+
+  precomputeSentenceVectors(sent_, in1);
+}
+
+void FastText::fetchNNSent(int32_t k, std::string filename, std::string query_sentence){
+  nnsent_.clear();
+  std::stringstream ss(query_sentence);
+  std::string sentence;
+  std::ifstream in1(filename);
+  int64_t n = 0;
+
+  Vector buffer(args_->dim), query(args_->dim);
+  std::vector<std::string> sentences;
+
+  std::vector<int32_t> line, labels;
+  std::ifstream in2(filename);
+
+  while (in2.peek() != EOF) {
+    std::getline(in2, sentence);
+    sentences.push_back(sentence);
+    n++;
+  }
+
+  std::set<std::string> banSet;
+  query.zero();
+  dict_->getLine(ss, line, labels, model_->rng);
+  dict_->addNgrams(line, args_->wordNgrams);
+  buffer.zero();
+  for (auto it = line.cbegin(); it != line.cend(); ++it) {
+    buffer.addRow(*input_, *it);
+  }
+  if (!line.empty()) {
+    buffer.mul(1.0 / line.size());
+  }
+  query.addVector(buffer, 1.0);
+
+  findNNSent(sent_, query, k, banSet, n, sentences);
+  // std::cout << std::endl;
 }
 
 

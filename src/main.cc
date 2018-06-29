@@ -253,6 +253,21 @@ void nnSent(int argc, char** argv) {
   exit(0);
 }
 
+void startNNSent(int argc, char** argv) {
+  int32_t k;
+  if (argc == 4) {
+    k = 10;
+  } else if (argc == 5) {
+    k = atoi(argv[4]);
+  } else {
+    printNNSentUsage();
+    exit(EXIT_FAILURE);
+  }
+  FastText fasttext;
+  sentenceVectors = fasttext.startNNSent(k,std::string(argv[3]));
+  exit(0);
+}
+
 
 void analogies(int argc, char** argv) {
   int32_t k;

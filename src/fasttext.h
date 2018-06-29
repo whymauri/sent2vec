@@ -37,6 +37,7 @@ class FastText {
     
     std::shared_ptr<Matrix> input_;
     std::shared_ptr<Matrix> output_;
+    Matrix sent_;
 
     std::shared_ptr<QMatrix> qinput_;
     std::shared_ptr<QMatrix> qoutput_;
@@ -53,6 +54,7 @@ class FastText {
   public:
     FastText();
 
+    std::vector<std::string> nnsent_;
     void getVector(Vector&, const std::string&) const;
     void saveVectors();
     void saveOutput();
@@ -89,6 +91,8 @@ class FastText {
                 const std::set<std::string>&);
     void findNNSent(const Matrix&, const Vector&, int32_t,
                 const std::set<std::string>&, int64_t, const std::vector<std::string>&);
+    void startNNSent(std::string);
+    void fetchNNSent(int32_t,std::string,std::string);
     void nn(int32_t);
     void analogies(int32_t);
     void nnSent(int32_t, std::string );
