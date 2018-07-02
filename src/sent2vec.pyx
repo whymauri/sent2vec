@@ -103,8 +103,8 @@ cdef class Sent2vecModel:
         final = w.asarray(len(sentences) * self.get_emb_size()) 
         return final.reshape(len(sentences), self.get_emb_size())
 
-    def start_nnsent(self,filename):
-        self.load_model("../../../Downloads/twitter_bigrams.bin")
+    def start_nnsent(self,filename,model):
+        self.load_model(model)
         cdef string cfilename = filename.encode('utf-8', 'ignore')
         self._thisptr.startNNSent(cfilename)
 
